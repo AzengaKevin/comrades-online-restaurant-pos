@@ -11,6 +11,31 @@ class UserControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
+    public function test_api_users_index_route(): void
+    {
+        $this->withoutExceptionHandling();
+
+        User::factory()->count(20)->create();
+
+        $response = $this->getJson(route('api.users.index'));
+
+        $response->assertOk();
+
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'id',
+                    'name',
+                    'email',
+                    'created_at',
+                    'updated_at',
+                ],
+            ],
+            'links',
+            'meta',
+        ]);
+    }
+
     public function test_api_users_me_route(): void
     {
         $this->withoutExceptionHandling();
