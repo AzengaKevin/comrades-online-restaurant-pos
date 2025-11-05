@@ -14,9 +14,9 @@ class SyncRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'created' => ['required', 'array'],
-            'updated' => ['required', 'array'],
-            'deleted' => ['required', 'array'],
+            'created' => ['nullable', 'array'],
+            'updated' => ['nullable', 'array'],
+            'deleted' => ['nullable', 'array'],
             'last_synced_at' => ['required', 'date'],
         ];
     }
