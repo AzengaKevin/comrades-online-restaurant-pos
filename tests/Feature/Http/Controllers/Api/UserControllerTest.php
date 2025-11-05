@@ -159,4 +159,66 @@ class UserControllerTest extends TestCase
             ],
         ]);
     }
+
+    public function test_api_users_sync_route(): void
+    {
+        $this->withoutExceptionHandling();
+
+        $updatedUser = User::factory()->create();
+
+        $payload = [
+            'created' => [
+                [
+                    'id' => fake()->uuid(),
+                    'name' => fake()->name(),
+                    'email' => fake()->unique()->safeEmail(),
+                    'phone' => fake()->numerify('2547########'),
+                    'address' => fake()->streetAddress(),
+                    'pin' => fake()->numerify('####'),
+                    'email_verified_at' => now()->subHours(5)->toISOString(),
+                    'phone_verified_at' => now()->subHours(5)->toISOString(),
+                    'created_at' => now()->subHours(5)->toISOString(),
+                ],
+                [
+                    'id' => fake()->uuid(),
+                    'name' => fake()->name(),
+                    'email' => fake()->unique()->safeEmail(),
+                    'phone' => fake()->numerify('2547########'),
+                    'address' => fake()->streetAddress(),
+                    'pin' => fake()->numerify('####'),
+                    'email_verified_at' => now()->subHours(3)->toISOString(),
+                    'phone_verified_at' => now()->subHours(3)->toISOString(),
+                    'created_at' => now()->subHours(3)->toISOString(),
+                ],
+            ],
+            'updated' => [
+                [
+                    'id' => $updatedUser->id,
+                    'name' => fake()->name(),
+                    'email' => fake()->unique()->safeEmail(),
+                    'phone' => fake()->numerify('2547########'),
+                    'address' => fake()->streetAddress(),
+                    'pin' => fake()->numerify('####'),
+                    'updated_at' => now()->toISOString(),
+                ],
+            ],
+            'deleted' => User::factory()->count(2)->create()->pluck('id')->all(),
+            'last_synced_at' => now()->subDay()->toISOString(),
+        ];
+
+        /** @var User $user */
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user, 'sanctum')->postJson(route('api.users.sync', $payload));
+
+        $response->assertOk();
+
+        $response->assertJsonStructure([
+            'data' => [
+                'created',
+                'updated',
+                'deleted',
+            ],
+        ]);
+    }
 }

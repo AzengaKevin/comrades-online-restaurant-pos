@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\SyncRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
@@ -75,5 +76,19 @@ class UserController extends Controller
         $user = $request->user();
 
         return new UserResource($user);
+    }
+
+    public function sync(SyncRequest $syncRequest)
+    {
+        $data = $syncRequest->validated();
+
+        $changes = DB::transaction(function () use ($data) {
+
+            return $this->userService->sync($data);
+        });
+
+        return response()->json([
+            'data' => $changes,
+        ]);
     }
 }
